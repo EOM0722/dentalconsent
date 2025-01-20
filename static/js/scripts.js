@@ -6,10 +6,21 @@ let lastY = 0;
 let previousWidth = 0;
 
 // API 엔드포인트 설정 
-const API_URL = 'https://dentalconsent.ngrok.app';
+const API_URL = 'https://dentalconsent.ngrok.app'; 
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykMoNg3OZOTqxEnCDYfx63yJhZjvT-bzkPMPHTsazoouFHNYflOwy5GLL86SGRmPNa/exec';
 
-// 서명 패드 초기화
+// JSONP 콜백 함수
+function handleGoogleResponse(response) {
+   if (response.result === 'success') {
+       alert('데이터가 성공적으로 저장되었습니다.');
+       window.location.href = 'https://www.appleden.com/';
+   } else {
+       alert('데이터 저장에 실패했습니다.');
+       document.getElementById('submitButton').disabled = false;
+   }
+}
+
+// 서명 패드 초기화  
 document.addEventListener('DOMContentLoaded', function () {
    // 동의 여부 선택 폼 이벤트 리스너 추가
    const consentForm = document.getElementById('consentForm');
@@ -86,7 +97,7 @@ function initializeCanvas() {
    canvas.addEventListener('mouseup', stopDrawing);
    canvas.addEventListener('mouseout', stopDrawing);
 
-   // 터치 이벤트
+   // 터치 이벤트 
    canvas.addEventListener('touchstart', handleTouchStart);
    canvas.addEventListener('touchmove', handleTouchMove);
    canvas.addEventListener('touchend', () => (isDrawing = false));
@@ -270,7 +281,8 @@ async function submitForm() {
            throw new Error('서명 저장 중 오류가 발생했습니다.');
        }
 
-       // 폼 데이터를 URL 파라미터로 변환
+       // JSONP 방식으로 Google Sheets에 데이터 전송
+       const script = document.createElement('script');
        const params = new URLSearchParams({
            name: name,
            birthdate: birthdate,
@@ -278,21 +290,15 @@ async function submitForm() {
            phone: phone,
            gender: gender,
            consentDate: consentDate,
-           consent: consent
+           consent: consent,
+           callback: 'handleGoogleResponse'  // JSONP 콜백 함수명
        }).toString();
-
-       // fetch를 사용하여 데이터 전송
-       const response = await fetch(SCRIPT_URL + '?' + params);
        
-       if (response.ok) {
-           alert('데이터가 성공적으로 저장되었습니다.');
-           window.location.href = 'https://www.appleden.com/';
-       } else {
-           throw new Error('데이터 저장에 실패했습니다.');
-       }
+       script.src = `${SCRIPT_URL}?${params}`;
+       document.body.appendChild(script);
+
    } catch (error) {
        alert('오류가 발생했습니다: ' + error.message);
-   } finally {
        document.getElementById('submitButton').disabled = false;
    }
 }

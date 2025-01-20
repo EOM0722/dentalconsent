@@ -270,29 +270,23 @@ async function submitForm() {
             throw new Error('서명 저장 중 오류가 발생했습니다.');
         }
 
-        // 새로운 form 생성
-        const submitForm = document.createElement('form');
-        submitForm.method = 'POST';
-        submitForm.action = SCRIPT_URL;
-        submitForm.target = '_blank';  // 새 탭에서 열리도록 설정
-
-        // 폼 데이터 추가
-        const formData = {
-            name, birthdate, address, phone, gender, consentDate, consent
-        };
-
-        // hidden input fields 생성
-        Object.keys(formData).forEach(key => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = key;
-            input.value = formData[key];
-            submitForm.appendChild(input);
+        // Google Apps Script로 데이터 전송
+        const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                name: name,
+                birthdate: birthdate,
+                address: address,
+                phone: phone,
+                gender: gender,
+                consentDate: consentDate,
+                consent: consent
+            })
         });
-
-        // form을 body에 추가하고 제출
-        document.body.appendChild(submitForm);
-        submitForm.submit();
 
         // 성공 처리
         alert('데이터가 성공적으로 저장되었습니다.');
@@ -300,6 +294,7 @@ async function submitForm() {
 
     } catch (error) {
         alert('오류가 발생했습니다: ' + error.message);
+    } finally {
         document.getElementById('submitButton').disabled = false;
     }
 }

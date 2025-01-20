@@ -289,7 +289,7 @@ async function submitForm() {
         });
 
         // 성공 처리
-        alert('데이터가 성공적으로 저장되었습니다.');
+        alert('기증해주셔서 진심으로 감사드립니다.');
         window.location.href = 'https://www.appleden.com/';
 
     } catch (error) {

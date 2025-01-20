@@ -6,21 +6,10 @@ let lastY = 0;
 let previousWidth = 0;
 
 // API 엔드포인트 설정 
-const API_URL = 'https://dentalconsent.ngrok.app'; 
+const API_URL = 'https://dentalconsent.ngrok.app';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykMoNg3OZOTqxEnCDYfx63yJhZjvT-bzkPMPHTsazoouFHNYflOwy5GLL86SGRmPNa/exec';
 
-// JSONP 콜백 함수
-function handleGoogleResponse(response) {
-   if (response.result === 'success') {
-       alert('데이터가 성공적으로 저장되었습니다.');
-       window.location.href = 'https://www.appleden.com/';
-   } else {
-       alert('데이터 저장에 실패했습니다.');
-       document.getElementById('submitButton').disabled = false;
-   }
-}
-
-// 서명 패드 초기화  
+// 서명 패드 초기화
 document.addEventListener('DOMContentLoaded', function () {
    // 동의 여부 선택 폼 이벤트 리스너 추가
    const consentForm = document.getElementById('consentForm');
@@ -46,7 +35,7 @@ function handleConsentSubmit(event) {
    }
 
    if (consent.value === "agree") {
-       window.location.href = "contact.html";
+       window.location.href = "templates/contact.html";
    } else {
        alert("문진 페이지로 이동합니다.");
        window.location.href = "https://www.appleden.com/";
@@ -97,7 +86,7 @@ function initializeCanvas() {
    canvas.addEventListener('mouseup', stopDrawing);
    canvas.addEventListener('mouseout', stopDrawing);
 
-   // 터치 이벤트 
+   // 터치 이벤트
    canvas.addEventListener('touchstart', handleTouchStart);
    canvas.addEventListener('touchmove', handleTouchMove);
    canvas.addEventListener('touchend', () => (isDrawing = false));
@@ -250,55 +239,67 @@ async function saveSignature() {
 
 // 폼 제출
 async function submitForm() {
-   const form = document.getElementById('contactForm');
-   if (!form) return;
-   
-   // 폼 데이터 수집
-   const name = document.getElementById('name').value;
-   const birthYear = document.getElementById('birthYear').value;
-   const birthMonth = String(document.getElementById('birthMonth').value).padStart(2, '0');
-   const birthDay = String(document.getElementById('birthDay').value).padStart(2, '0');
-   const birthdate = `${birthYear}-${birthMonth}-${birthDay}`;
-   const address = document.getElementById('address').value;
-   const phone = document.getElementById('phone').value;
-   const gender = document.getElementById('gender').value;
-   const currentDate = new Date();
-   const consentDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
-   const consent = document.getElementById('consent').checked;
+    const form = document.getElementById('contactForm');
+    if (!form) return;
+    
+    // 폼 데이터 수집
+    const name = document.getElementById('name').value;
+    const birthYear = document.getElementById('birthYear').value;
+    const birthMonth = String(document.getElementById('birthMonth').value).padStart(2, '0');
+    const birthDay = String(document.getElementById('birthDay').value).padStart(2, '0');
+    const birthdate = `${birthYear}-${birthMonth}-${birthDay}`;
+    const address = document.getElementById('address').value;
+    const phone = document.getElementById('phone').value;
+    const gender = document.getElementById('gender').value;
+    const currentDate = new Date();
+    const consentDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+    const consent = document.getElementById('consent').checked;
 
-   if (!consent) {
-       alert('인체유래물등 기증 동의가 필요합니다.');
-       return;
-   }
+    if (!consent) {
+        alert('인체유래물등 기증 동의가 필요합니다.');
+        return;
+    }
 
-   // Submit button 비활성화
-   document.getElementById('submitButton').disabled = true;
+    // Submit button 비활성화
+    document.getElementById('submitButton').disabled = true;
 
-   try {
-       // 서명 저장
-       const isSignatureSaved = await saveSignature();
-       if (!isSignatureSaved) {
-           throw new Error('서명 저장 중 오류가 발생했습니다.');
-       }
+    try {
+        // 서명 저장
+        const isSignatureSaved = await saveSignature();
+        if (!isSignatureSaved) {
+            throw new Error('서명 저장 중 오류가 발생했습니다.');
+        }
 
-       // JSONP 방식으로 Google Sheets에 데이터 전송
-       const script = document.createElement('script');
-       const params = new URLSearchParams({
-           name: name,
-           birthdate: birthdate,
-           address: address,
-           phone: phone,
-           gender: gender,
-           consentDate: consentDate,
-           consent: consent,
-           callback: 'handleGoogleResponse'  // JSONP 콜백 함수명
-       }).toString();
-       
-       script.src = `${SCRIPT_URL}?${params}`;
-       document.body.appendChild(script);
+        // 새로운 form 생성
+        const submitForm = document.createElement('form');
+        submitForm.method = 'POST';
+        submitForm.action = SCRIPT_URL;
+        submitForm.target = '_blank';  // 새 탭에서 열리도록 설정
 
-   } catch (error) {
-       alert('오류가 발생했습니다: ' + error.message);
-       document.getElementById('submitButton').disabled = false;
-   }
+        // 폼 데이터 추가
+        const formData = {
+            name, birthdate, address, phone, gender, consentDate, consent
+        };
+
+        // hidden input fields 생성
+        Object.keys(formData).forEach(key => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = formData[key];
+            submitForm.appendChild(input);
+        });
+
+        // form을 body에 추가하고 제출
+        document.body.appendChild(submitForm);
+        submitForm.submit();
+
+        // 성공 처리
+        alert('데이터가 성공적으로 저장되었습니다.');
+        window.location.href = 'https://www.appleden.com/';
+
+    } catch (error) {
+        alert('오류가 발생했습니다: ' + error.message);
+        document.getElementById('submitButton').disabled = false;
+    }
 }

@@ -32,7 +32,7 @@ function handleConsentSubmit(event) {
     }
 
     if (consent.value === "agree") {
-        window.location.href = "templates/contact.html";
+        window.location.href = "contact.html";
     } else {
         alert("문진 페이지로 이동합니다.");
         window.location.href = "https://www.appleden.com/";

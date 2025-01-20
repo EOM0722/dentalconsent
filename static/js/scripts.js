@@ -4,7 +4,7 @@ let lastX = 0;
 let lastY = 0;
 let previousWidth = 0;
 
-const API_URL = 'https://atob.ngrok.app';
+const API_URL = 'https://dentalconsent.ngrok.app';
 
 // 서명 패드 초기화
 document.addEventListener('DOMContentLoaded', function () {

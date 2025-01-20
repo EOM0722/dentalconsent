@@ -1,10 +1,13 @@
+// 전역 변수 선언
 let canvas, ctx;
 let isDrawing = false;
 let lastX = 0;
 let lastY = 0;
 let previousWidth = 0;
 
+// API 엔드포인트 설정
 const API_URL = 'https://dentalconsent.ngrok.app';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykMoNg3OZOTqxEnCDYfx63yJhZjvT-bzkPMPHTsazoouFHNYflOwy5GLL86SGRmPNa/exec';
 
 // 서명 패드 초기화
 document.addEventListener('DOMContentLoaded', function () {
@@ -265,9 +268,8 @@ async function submitForm() {
     }
 
     // 구글 스크립트 API 호출
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykMoNg3OZOTqxEnCDYfx63yJhZjvT-bzkPMPHTsazoouFHNYflOwy5GLL86SGRmPNa/exec';
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', url);
+    xhr.open('POST', GOOGLE_SCRIPT_URL);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     
     xhr.onreadystatechange = function () {
@@ -285,8 +287,8 @@ async function submitForm() {
         }
     };
 
-    const data = `name=${encodeURIComponent(name)}&birthdate=${encodeURIComponent(birthdate)}&address=${encodeURIComponent(address)}&phone=${encodeURIComponent(phone)}&gender=${encodeURIComponent(gender)}&consentDate=${encodeURIComponent(consentDate)}&consent=${encodeURIComponent(consent)}`;
+    const formData = `name=${encodeURIComponent(name)}&birthdate=${encodeURIComponent(birthdate)}&address=${encodeURIComponent(address)}&phone=${encodeURIComponent(phone)}&gender=${encodeURIComponent(gender)}&consentDate=${encodeURIComponent(consentDate)}&consent=${encodeURIComponent(consent)}`;
 
-    xhr.send(data);
+    xhr.send(formData);
     document.getElementById('submitButton').disabled = true;
 }

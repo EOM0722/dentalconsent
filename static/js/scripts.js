@@ -37,7 +37,7 @@ function handleConsentSubmit(event) {
    if (consent.value === "agree") {
        window.location.href = "contact.html";
    } else {
-       alert("문진 페이지로 이동합니다.");
+       alert("사과나무치과병원 공식홈페이지로 이동합니다.");
        window.location.href = "https://www.appleden.com/";
    }
 }
